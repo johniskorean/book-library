@@ -4,17 +4,21 @@ from django.http import JsonResponse
 from .google_books_api import search_books, get_book_details
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def search_books_view(request):
   query = request.GET.get('q', '')
+  max_results = request.GET.get('maxResults', 36)
   if not query:
     return JsonResponse({'error': 'No query provided'}, status=400)
   try:
-    results = search_books(query)
+    results = search_books(query, max_results)
     return JsonResponse(results)
   except requests.exceptions.RequestException as error:
     return JsonResponse({'error': str(error)}, status=500)
 
+@csrf_exempt
 def book_details_view(request, book_id):
   try:
     details = get_book_details(book_id)
@@ -22,6 +26,7 @@ def book_details_view(request, book_id):
   except requests.exceptions.RequestException as error:
     return JsonResponse({'error': str(error)}, status=500)
 
+@csrf_exempt
 def save_book_view(request, book_id):
   try:
     details = get_book_details(book_id)
@@ -42,10 +47,11 @@ def save_book_view(request, book_id):
   except requests.exceptions.RequestException as error:
     return JsonResponse({'error': str(error)}, status=500)
 
+@csrf_exempt
 def get_saved_books_view(request):
   page_number = request.GET.get('page', 1)
   books = Book.objects.all().order_by('-id')
-  paginator = Paginator(books, 10)
+  paginator = Paginator(books, 12)
 
   try:
     page_obj = paginator.get_page(page_number)
@@ -53,7 +59,7 @@ def get_saved_books_view(request):
     page_obj = paginator.page(1)
   except EmptyPage:
     page_obj = paginator.page(paginator.num_pages)
-    
+
   return JsonResponse({
     'books': list(page_obj.object_list.values()),
     'has_next': page_obj.has_next(),
@@ -61,9 +67,10 @@ def get_saved_books_view(request):
     'total_pages': paginator.num_pages
   })
 
+@csrf_exempt
 def delete_book(request, book_id):
   try:
-    book = Book.objects.get(id=book_id)
+    book = Book.objects.get(google_book_id=book_id)
     book.delete()
     return JsonResponse({'status': 'success', 'message': 'Book deleted successfully'})
   except Book.DoesNotExist:
