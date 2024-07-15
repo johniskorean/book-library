@@ -37,14 +37,14 @@ const BookCard: React.FC<BookCardProps> = ({
 	const handleActionClick = () => {
 		if (!isSaved) {
 			toast({
-				title: "Book Saved",
-				description: `The book "${
-					book.volumeInfo?.title || book.title
-				} has been successfully saved."`,
-				duration: 5000,
+				title: isSaved ? "Book Removed" : "Bookd Saved",
+				description: isSaved
+					? `The book "${title} has been successfully deleted."`
+					: `The book "${title} has been successfully saved."`,
+				duration: 3000,
 			});
 		}
-		onAction(book.google_book_id || book.id);
+		onAction(bookId);
 	};
 
 	return (

@@ -11,6 +11,7 @@ import {
 	PaginationLink,
 } from "./ui/pagination";
 import usePagination from "../hooks/usePagination";
+import { useSearchParams } from "react-router-dom";
 
 const booksPerPage = 6;
 
@@ -18,9 +19,11 @@ const SavedBooks: React.FC = () => {
 	const [savedBooks, setSavedBooks] = useState<Book[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const queryParam = searchParams.get("query") || "";
 
 	const { currentPage, totalPages, handlePageChange, paginatedItems, ref } =
-		usePagination<Book>(savedBooks.length, booksPerPage);
+		usePagination<Book>(savedBooks.length, booksPerPage, queryParam);
 
 	useEffect(() => {
 		fetchSavedBooks();
@@ -72,9 +75,9 @@ const SavedBooks: React.FC = () => {
 			<h1 className="text-3xl font-bold p-4">Saved Books</h1>
 			{error && <p className="text-red-600">{error}</p>}
 			{isLoading ? (
-				<p>Loading saved books...</p>
+				<p className="font-bold">Loading saved books...</p>
 			) : savedBooks.length === 0 ? (
-				<p>You haven't saved any books yet.</p>
+				<p className="font-bold px-3">You haven't saved any books yet.</p>
 			) : (
 				<>
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
@@ -90,7 +93,7 @@ const SavedBooks: React.FC = () => {
 						))}
 					</div>
 
-							{/* TODO: Fix the pagination feature for Saved Books */}
+					{/* TODO: Fix the pagination feature for Saved Books */}
 
 					{savedBooks.length > booksPerPage && (
 						<div className="flex justify-center mt-6">

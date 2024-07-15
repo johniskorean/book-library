@@ -18,7 +18,6 @@ export function Toaster() {
 				title,
 				description,
 				action,
-				duration,
 				...props
 			}) {
 				return (

@@ -1,4 +1,5 @@
 import { MutableRefObject, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 interface PaginationResult<T> {
 	currentPage: number;
@@ -10,16 +11,20 @@ interface PaginationResult<T> {
 
 const usePagination = <T,>(
 	totalItems: number,
-	itemsPerPage: number
+	itemsPerPage: number,
+	query: string
 ): PaginationResult<T> => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const totalPages = Math.ceil(totalItems / itemsPerPage);
 	const ref = useRef<HTMLDivElement | null>(null);
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const handlePageChange = (page: number) => {
 		if (page >= 1 && page <= totalPages) {
 			setCurrentPage(page);
 			ref.current?.scrollIntoView({ behavior: "smooth" });
+
+			setSearchParams({ query, page: page.toString() });
 		}
 	};
 

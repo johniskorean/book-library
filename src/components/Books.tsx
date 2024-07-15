@@ -4,12 +4,14 @@ import { getBooksDetails } from "../api/books";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Book } from "../type.ts";
+import DOMPurify from "dompurify";
 
 const Books: React.FC = () => {
 	const [book, setBook] = useState<Book | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { id } = useParams<{ id: string }>();
+
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -32,10 +34,6 @@ const Books: React.FC = () => {
 	if (loading) return <div>Loading...</div>;
 	if (error) return <div>{error}</div>;
 	if (!book) return <div>No book found</div>;
-
-	const handleBackToSearch = () => {
-		navigate("/", { state: { fromBookDetails: true } });
-	};
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -70,12 +68,18 @@ const Books: React.FC = () => {
 					<p className="mt-4">
 						<strong>Description:</strong>
 					</p>
-					<p>{book.volumeInfo?.description || "No description available."}</p>
+					<p
+						dangerouslySetInnerHTML={{
+							__html: DOMPurify.sanitize(
+								book.volumeInfo?.description || "No description avaiable"
+							),
+						}}
+					></p>
 				</CardContent>
 			</Card>
 			<div className="m-4">
 				{/* TODO: Add Toaster for deleting the book */}
-				<Button onClick={handleBackToSearch}>Back to Search</Button>
+				<Button onClick={() => navigate(-1)}>Back to Search</Button>
 			</div>
 		</div>
 	);
