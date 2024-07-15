@@ -102,6 +102,9 @@ const Home: React.FC = () => {
 			<SearchBar onSearch={handleSearch} initialInput={lastSearch} />
 			{error && <p className="text-red-600">{error}</p>}
 
+			{/*TODO: Add a better loading image/statement.
+possibly an big image in the middle of the container  */}
+
 			{isLoading ? (
 				<div>Loading...</div>
 			) : (
@@ -127,6 +130,8 @@ const Home: React.FC = () => {
 									</PaginationContent>
 								</Pagination>
 							</div>
+              
+							{/* TODO: Also style it better. */}
 						</>
 					) : isSearching ? (
 						<p>No books found.</p>

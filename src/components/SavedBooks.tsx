@@ -89,6 +89,9 @@ const SavedBooks: React.FC = () => {
 							</div>
 						))}
 					</div>
+
+							{/* TODO: Fix the pagination feature for Saved Books */}
+
 					{savedBooks.length > booksPerPage && (
 						<div className="flex justify-center mt-6">
 							<Pagination>
