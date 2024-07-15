@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import { Book } from "../type";
 import { useToast } from "../hooks/useToast";
+import DOMPurify from "dompurify";
 
 interface BookCardProps {
 	book: Book;
@@ -63,7 +64,11 @@ const BookCard: React.FC<BookCardProps> = ({
 					/>
 				)}
 				<p className="font-bold mb-2 text-lg">{authors.join(", ")}</p>
-				<p>{description.substring(0, 100)}...</p>
+				<p
+					dangerouslySetInnerHTML={{
+						__html: DOMPurify.sanitize(description.substring(0, 100)),
+					}}
+				></p>
 			</CardContent>
 			<CardFooter className="absolute bottom-0 left-0 w-full flex p-4 justify-between">
 				<Button asChild variant="outline">

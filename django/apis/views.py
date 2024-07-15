@@ -1,32 +1,35 @@
 import requests
 from .models import Book
-from django.http import JsonResponse
 from .google_books_api import search_books, get_book_details
-from django.shortcuts import get_object_or_404
+from .serializers import ContactSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.mail import send_mail
 
-@csrf_exempt
+@api_view(['GET'])
 def search_books_view(request):
   query = request.GET.get('q', '')
   max_results = request.GET.get('maxResults', 36)
   if not query:
-    return JsonResponse({'error': 'No query provided'}, status=400)
+    return Response({'error': 'No query provided'}, status=status.HTTP_400_BAD_REQUEST)
   try:
     results = search_books(query, max_results)
-    return JsonResponse(results)
+    return Response(results)
   except requests.exceptions.RequestException as error:
-    return JsonResponse({'error': str(error)}, status=500)
+    return Response({'error': str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@csrf_exempt
+@api_view(['GET'])
 def book_details_view(request, book_id):
   try:
     details = get_book_details(book_id)
-    return JsonResponse(details)
+    return Response(details)
   except requests.exceptions.RequestException as error:
-    return JsonResponse({'error': str(error)}, status=500)
+    return Response({'error': str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@csrf_exempt
+@api_view(['POST'])
 def save_book_view(request, book_id):
   try:
     details = get_book_details(book_id)
@@ -43,11 +46,34 @@ def save_book_view(request, book_id):
       }
 
     )
-    return JsonResponse({'status': 'success', 'created': created})
+    return Response({'status': 'success', 'created': created})
   except requests.exceptions.RequestException as error:
-    return JsonResponse({'error': str(error)}, status=500)
+    return Response({'error': str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@csrf_exempt
+@api_view(['POST'])
+def submit_contact(request):
+  serializer = ContactSerializer(data=request.data)
+  if serializer.is_valid():
+      serializer.save()
+
+      subject = f"New Contact Form Submission from {serializer.validated_data['name']}"
+      message = f"Name: {serializer.validated_data['name']}\n" \
+                f"Email: {serializer.validated_data['email']}\n" \
+                f"Message: {serializer.validated_data['message']}"
+      from_email = settings.EMAIL_HOST_USER
+      recipient_list = [settings.EMAIL_HOST_USER]
+
+      try:
+        send_mail(subject, message, from_email, recipient_list)
+      except Exception as error:
+        print(f"Failed to send email: {error}")
+        return Response({"message": "Contact submitted but email notification failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+      return Response({"message": "Contact submission successful"}, status=status.HTTP_201_CREATED)
+  else:
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
 def get_saved_books_view(request):
   page_number = request.GET.get('page', 1)
   books = Book.objects.all().order_by('-id')
@@ -60,18 +86,18 @@ def get_saved_books_view(request):
   except EmptyPage:
     page_obj = paginator.page(paginator.num_pages)
 
-  return JsonResponse({
+  return Response({
     'books': list(page_obj.object_list.values()),
     'has_next': page_obj.has_next(),
     'has_previous': page_obj.has_previous(),
     'total_pages': paginator.num_pages
   })
 
-@csrf_exempt
+@api_view(['DELETE'])
 def delete_book(request, book_id):
   try:
     book = Book.objects.get(google_book_id=book_id)
     book.delete()
-    return JsonResponse({'status': 'success', 'message': 'Book deleted successfully'})
+    return Response({'status': 'success', 'message': 'Book deleted successfully'})
   except Book.DoesNotExist:
-    return JsonResponse({'status': 'error', 'message': 'Book not found'})
+    return Response({'status': 'error', 'message': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)

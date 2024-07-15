@@ -7,6 +7,5 @@ const apiClient = axios.create({
 	},
 });
 
-// console.log("API Base URL: ", apiClient.defaults.baseURL);
 
 export default apiClient;

@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Home from "./components/Home";
 import Books from "./components/Books";
 import SavedBooks from "./components/SavedBooks";
+import Contact from "./components/Contact";
 
 function App() {
 	return (
@@ -12,8 +13,7 @@ function App() {
 				<Route path="/" element={<Home />} />
 				<Route path="/book/:id" element={<Books />} />
 				<Route path="/saved-books" element={<SavedBooks />} />
-				{/*  <Route path="/about" element={<About />} />
-				 <Route path="/contact" element={<Contact />} /> */}
+				<Route path="/contact" element={<Contact />} />
 			</Routes>
 		</>
 	);

@@ -13,7 +13,6 @@ interface LinkType {
 
 const links: LinkType[] = [
 	{ href: "/saved-books", label: "Saved Books" },
-	{ href: "/about", label: "About" },
 	{ href: "/contact", label: "Contact" },
 ];
 

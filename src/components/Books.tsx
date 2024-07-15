@@ -78,8 +78,7 @@ const Books: React.FC = () => {
 				</CardContent>
 			</Card>
 			<div className="m-4">
-				{/* TODO: Add Toaster for deleting the book */}
-				<Button onClick={() => navigate(-1)}>Back to Search</Button>
+				<Button onClick={() => navigate(-1)}>Go Back</Button>
 			</div>
 		</div>
 	);
